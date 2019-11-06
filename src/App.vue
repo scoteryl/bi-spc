@@ -19,6 +19,7 @@ export default {
 </script>
 <style lang="less">
 @import url(./common/normal.css);
+@import url(./common/amendStyle.less);
 
 #app {
   // font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -27,7 +28,7 @@ export default {
   // // text-align: center;
   // color: #2c3e50;
   height: 100%;
-  overflow: auto;
+  // overflow: auto;
   position: relative;
 }
 </style>
