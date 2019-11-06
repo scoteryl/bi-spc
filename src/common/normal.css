@@ -1,0 +1,79 @@
+html,body{
+  height: 100%;
+  /* overflow: hidden; */
+}
+body {
+  background-color: #fff;
+  line-height: 1;
+  color: #000;
+  font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif;
+  font-size: 14px;
+}
+body,h1,h2,h3,h4,h5,h6,dl,dd,p,tr,th,td{
+  margin: 0;
+  padding:0;
+}
+
+a,a:hover,a:active,a:visited,a:link,a:focus{
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
+  outline:none;
+  background: none;
+  text-decoration: none;
+}
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* 清IOS默认样式及高亮 */
+input:checked,
+input:disabled,
+input,
+select:checked,
+select:disabled,
+select,
+button:checked,
+button:disabled,
+button{
+  -webkit-appearance: none;
+  outline: none;
+}
+input:focus,
+textarea:focus {
+  outline: none;
+}
+textarea {
+  overflow: auto;
+  resize: none;
+  outline: none;
+}
+img {
+  border: none;
+	vertical-align: middle;
+}
+*{
+  box-sizing: border-box;
+	-webkit-tap-highlight-color:transparent;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.clearfix:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+/* 日期选择去上下选择箭头*/
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button,
+input[type=date]::-webkit-inner-spin-button,
+input[type=date]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}   
