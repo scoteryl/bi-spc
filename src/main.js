@@ -3,9 +3,15 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+// echarts
+import Echarts from 'echarts';
+Vue.prototype.$echarts = Echarts;
+
 // ElementUI
 import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
+// import 'element-ui/lib/theme-chalk/index.css';
+// 自定义样式
+import './assets/theme/index.css';
 Vue.use(ElementUI);
 
 // common 公用方法

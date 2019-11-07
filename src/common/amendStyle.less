@@ -1,5 +1,6 @@
 // 修改Element样式
 #app{
+  // mini input
   .el-input--mini .el-input__icon{
     line-height: 22px;
   }
@@ -12,16 +13,43 @@
   .el-input--prefix .el-input__inner{
     padding-left: 22px;
   }
+  .el-textarea__inner{
+    padding: 5px 10px;
+  }
   .el-input__inner{
     padding: 0 10px;
   }
+  // mini button
   .el-button--mini, .el-button--mini.is-round{
     padding: 4px 15px;
   }
+
+  // table
   .el-table td, .el-table th{
     padding: 5px 0;
   }
   .el-table .cell{
     line-height: 20px;
+  }
+
+  // dialog
+  .el-dialog__header{
+    padding: 15px 20px 10px;
+  }
+  .el-dialog__headerbtn{
+    top: 15px;
+    // right: 10px;
+  }
+  .el-dialog__body{
+    padding: 10px 20px 15px;
+  }
+
+  // form-item
+  .el-form-item{
+    // margin-bottom: 15px;
+  }
+  .el-form-item__content,
+  .el-form-item__label{
+    line-height: 30px;
   }
 }

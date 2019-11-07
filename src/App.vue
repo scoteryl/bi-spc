@@ -9,6 +9,15 @@ export default {
   data: function(){
     return {}
   },
+  created: function(){
+    // 保存初始化视口宽/高,并记录到vuex
+    this.$store.state.windowViewW = window.innerWidth;
+    this.$store.state.windowViewH = window.innerHeight;
+    window.onresize = () => {
+      this.$store.state.windowViewW = window.innerWidth;
+      this.$store.state.windowViewH = window.innerHeight;
+    }
+  },
   methods: {
     // clickMe: function(){
     //   // this.$message.closeAll();

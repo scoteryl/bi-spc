@@ -12,6 +12,11 @@ module.exports = {
   // see https://github.com/vuejs/vue-cli/blob/dev/docs/webpack.md
   chainWebpack: () => {},
   configureWebpack: () => {},
+  // configureWebpack: {
+  //   output: {
+  //     libraryExport: 'default'
+  //   }
+  // }
   // vue-loader 配置项
   // https://vue-loader.vuejs.org/en/options.html
   // vueLoader: {},
