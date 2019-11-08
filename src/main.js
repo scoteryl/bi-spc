@@ -7,6 +7,9 @@ import store from './store'
 import Echarts from 'echarts';
 Vue.prototype.$echarts = Echarts;
 
+// font-awesome 
+import './assets/font-awesome.css'
+
 // ElementUI
 import ElementUI from 'element-ui';
 // import 'element-ui/lib/theme-chalk/index.css';
