@@ -19,7 +19,7 @@ Vue.use(ElementUI);
 
 // common 公用方法
 import Common from './common/common_vue.js'
-window.Common = Common;
+Vue.prototype.$common = Common;
 
 // md5
 import md5 from 'blueimp-md5';

@@ -61,3 +61,28 @@
     clear: both;
   }
 }
+
+// grid 单一项目样式
+.gridItem(){
+  height: 100%;
+  width: 100%;
+  background-color: #fff;
+  overflow: hidden;
+  >.gridItemTit{
+    padding: 0 5px;
+    height: 25px;
+    line-height: 25px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #fff;
+    background-color: rgba(0,0,0,0.4);
+  }
+  >.gridItemView{
+    height: 100%;
+    &.hasTit{
+      height: calc(100% - 25px);
+    }
+    width: 100%;
+  }
+}

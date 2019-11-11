@@ -29,6 +29,12 @@
             </div>
           </li>
           <li class="swiper-slide">
+            <div class="optionItem" @click='addLegend("time")'>
+              <img src="../../images/time_icon.png">
+              <span>日期</span>
+            </div>
+          </li>
+          <li class="swiper-slide">
             <div class="optionItem" @click='addLegend("video")'>
               <img src="../../images/video_icon.png">
               <span>视频<br>音频</span>
@@ -104,7 +110,7 @@
                 >
                 <div class="itemTopMenu">
                   <ul>
-                    <li @click="configItem(item)" title="配置"><span class="fa fa-cogs"></span></li>
+                    <li v-if="item.options.config" @click="configItem(item)" title="配置"><span class="fa fa-cogs"></span></li>
                     <li @click="removeItem(item)" title="删除"><span class="fa fa-trash"></span></li>
                   </ul>
                 </div>
@@ -136,6 +142,49 @@
         </grid-layout>
       </div>
     </div>
+
+    <!-- 日期设置修改弹窗 -->
+    <el-dialog
+      title="组件设置"
+      :visible.sync="timeComponentSetting.show"
+      width="350px"
+      >
+      <div class="timeComponentSettingPopup">
+        <el-form 
+          ref="timeComponentSettingForm"
+          label-width="80px">
+          <el-form-item label="显示格式">
+            <el-select 
+              v-model="timeComponentSetting.form.timeFormat" 
+              placeholder="请选择活动区域"
+              size='small'
+              >
+              <el-option 
+                v-for="opt in timeComponentSetting.format"
+                :label="opt.label"
+                :value="opt.value" 
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="字体大小" >
+            <el-input-number v-model="timeComponentSetting.form.fontNum" :min="10" :max="150" size='small'></el-input-number>
+          </el-form-item>
+          <el-form-item label="字体颜色" >
+            <el-color-picker v-model="timeComponentSetting.form.color" show-alpha size="small"></el-color-picker>
+          </el-form-item>
+          <el-form-item label="字体加粗" >
+            <el-switch
+              v-model="timeComponentSetting.form.fontBold"
+              >
+            </el-switch>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" size='small' @click="settingTimeComponent(1)">{{timeComponentSetting.type==1?'创建':'修改'}}</el-button>
+            <el-button size='small' @click="settingTimeComponent(2)">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -149,6 +198,8 @@ const GridTable = () => import('../../components/gridTable.vue');
 const GridPic = () => import('../../components/gridPic.vue');
 // 富文本组件
 const GridText = () => import('../../components/gridText.vue');
+// 时间组件
+const GridTime = ()=> import('../../components/gridTime.vue');
 // 音\视频组件
 const GridVideo = () => import('../../components/gridVideo.vue');
 // web组件
@@ -179,12 +230,77 @@ export default {
         margin: [2, 2],
         colNum: 50,
         height: 20
+      },
+
+      // 日期组件设置
+      timeComponentSetting: {
+        // 显示
+        show: false,
+        // 1 创建  2 修改
+        type: 1,
+        // 日期显示格式
+        format: [
+          {
+            label: 'yyyy年MM月dd日 hh时mm分ss秒',
+            value: 1
+          },{
+            label: 'yyyy-MM-dd hh:mm:ss',
+            value: 2
+          },{
+            label: 'yyyy/MM/dd hh:mm:ss',
+            value: 3
+          },{
+            label: 'yyyy年MM月dd日 hh时mm分',
+            value: 4
+          },{
+            label: 'yyyy-MM-dd hh:mm',
+            value: 5
+          },{
+            label: 'yyyy/MM/dd hh:mm',
+            value: 6
+          },{
+            label: 'yyyy年MM月dd日',
+            value: 7
+          },{
+            label: 'yyyy-MM-dd',
+            value: 8
+          },{
+            label: 'yyyy/MM/dd',
+            value: 9
+          },{
+            label: 'hh时mm分ss秒',
+            value: 10
+          },{
+            label: 'hh:mm:ss',
+            value: 11
+          },{
+            label: 'hh时mm分',
+            value: 12
+          },{
+            label: 'hh:mm',
+            value: 13
+          }
+        ],
+        // 表单 
+        form: {
+          // 设置ID
+          id: '',
+          // 日期显示格式
+          timeFormat: 1,
+          // 字体大小
+          fontNum: 16,
+          // 是否加粗
+          fontBold: false,
+          // 颜色
+          color: '#666666'
+        }
+
       }
     }
   },
   methods: {
     // 是否可以拖拽
-    gridDrap: function(item, state){
+    griddrap: function(item, state){
       // console.log(item,state);
       // item.isStatic = !state;
       // this.layout.forEach(one => {
@@ -217,6 +333,7 @@ export default {
         'chart': GridChart,
         'table': GridTable,
         'pic': GridPic,
+        'time': GridTime,
         'text': GridText,
         'video': GridVideo,
         'web': GridWeb
@@ -228,24 +345,64 @@ export default {
       var that = this;
       var backFun = {
         'chart': function(){
-          that.addGridItem(that.id++, type, 8, 5);
+          that.addGridItem(that.id++, type, 8, 5, {
+            "title": "我是图表组件标题",
+            "titleIsShow": true,
+            "config": true,
+          });
         },
         'table': function(){
-          that.addGridItem(that.id++, type, 8, 5);
+          that.addGridItem(that.id++, type, 8, 5, {
+            "title": "我是表格组件标题",
+            "titleIsShow": true,
+            "config": true,
+          });
 
         },
         'pic': function(){
-          that.addGridItem(that.id++, type, 8, 5);
+          that.addGridItem(that.id++, type, 8, 5, {
+            "title": "我是图片组件标题",
+            "titleIsShow": true,
+            "config": false,
+          });
 
         },
         'text': function(){
-          that.addGridItem(that.id++, type, 8, 5);
+          that.addGridItem(that.id++, type, 8, 5, {
+            "title": "我是富文本组件标题",
+            "titleIsShow": true,
+            "config": false,
+          });
+        },
+        'time': function(){
+          // 设置默认选项
+          that.timeComponentSetting.type = 1;
+          that.timeComponentSetting.form.id = '';
+          that.timeComponentSetting.form.timeFormat = 1;
+          that.timeComponentSetting.form.fontNum = 16;
+          that.timeComponentSetting.form.fontBold = false;
+          that.timeComponentSetting.form.color = '#666666';
+
+          that.timeComponentSetting.show = true;
+          // that.addGridItem(that.id++, type, 8, 5, {
+          //   "title": "我是日期组件标题",
+          //   "titleIsShow": true,
+          //   "config": true,
+          // });
         },
         'video': function(){
-          that.addGridItem(that.id++, type, 8, 5);
+          that.addGridItem(that.id++, type, 8, 5, {
+            "title": "我是音视频组件标题",
+            "titleIsShow": true,
+            "config": true,
+          });
         },
         'web': function(){
-          that.addGridItem(that.id++, type, 8, 5);
+          that.addGridItem(that.id++, type, 8, 5, {
+            "title": "我是web组件标题",
+            "titleIsShow": true,
+            "config": true,
+          });
         },
       }
       // 分类执行
@@ -260,8 +417,8 @@ export default {
         }
       });
     },
-    // 添加grid项目   gid 项目ID  type 类型  宽  高
-    addGridItem: function (gid, type, itemW, itemH) {
+    // 添加grid项目   gid 项目ID  type 类型  宽  高  option
+    addGridItem: function (gid, type, itemW, itemH, opiton) {
       // console.log(type);
       // 产生随机宽高
       // var itemW = 8;
@@ -283,8 +440,7 @@ export default {
         "isLink": false,
         // options
         "options": {
-          "title": "我是标题",
-          "titleIsShow": true,
+          ...opiton,
           // 更新时间戳
           "updataTime": this.updateTimes()
         }
@@ -313,8 +469,7 @@ export default {
                 "isStatic": false,
                 "isLink": false,
                 "options": {
-                  "title": "我是标题",
-                  "titleIsShow": true,
+                  ...opiton,
                   "updataTime": this.updateTimes()
                 }
               };
@@ -353,28 +508,75 @@ export default {
     // 删除项目
     removeItem: function(item){
       // console.log(item);
-      for(var i = this.layout.length-1;i>=0;i--){
-        var one = this.layout[i];
-        if(item.i==one.i){
-          this.layout.splice(i,1);
-          break;
+
+      this.$confirm('你确定要删除组件吗？', '删除', {
+        distinguishCancelAndClose: true,
+        type: 'warning',
+        confirmButtonText: '确认',
+        cancelButtonText: '取消'
+      }).then(() => {
+        //确定
+        for(var i = this.layout.length-1;i>=0;i--){
+          var one = this.layout[i];
+          if(item.i==one.i){
+            this.layout.splice(i,1);
+            break;
+          }
         }
-      }
-      // 当插件内容布局发生变化后  获取现在的二维地图树
-      this.$nextTick(function(){
-        this.layoutMap = this.genereatePlaneArr(this.layout);
+        // 当插件内容布局发生变化后  获取现在的二维地图树
+        this.$nextTick(function(){
+          this.layoutMap = this.genereatePlaneArr(this.layout);
+        });
+      }).catch(action => {
+        // 取消
       });
     },
     // 配置项目
     configItem: function(item){
-      // console.log(item);
-      for(var i = this.layout.length-1;i>=0;i--){
-        var one = this.layout[i];
-        if(item.i==one.i){
-          one.options.titleIsShow = !one.options.titleIsShow;
-          break;
-        }
+      console.log(item);
+      var that = this;
+      var backFun = {
+        'chart': function(){
+       
+        },
+        'table': function(){
+
+
+        },
+        'pic': function(){
+
+
+        },
+        'text': function(){
+        },
+        'time': function(){
+          // 修改时间组件
+          that.timeComponentSetting.type = 2;
+          that.timeComponentSetting.form.id = item.i;
+
+          that.timeComponentSetting.form.timeFormat = item.options.timeFormat.value;
+          that.timeComponentSetting.form.fontNum = item.options.fontNum;
+          that.timeComponentSetting.form.color = item.options.color;
+          that.timeComponentSetting.show = true;
+
+        },
+        'video': function(){
+ 
+        },
+        'web': function(){
+      
+        },
       }
+      // 分类执行
+      backFun[item.type]();
+
+      // for(var i = this.layout.length-1;i>=0;i--){
+      //   var one = this.layout[i];
+      //   if(item.i==one.i){
+      //     one.options.titleIsShow = !one.options.titleIsShow;
+      //     break;
+      //   }
+      // }
     },
     // 生成二维数组地图
     genereatePlaneArr: function (data) {
@@ -454,6 +656,56 @@ export default {
     rnd: function (m,n) {
       return (Math.random()*(m-n+1)+n)|0;
     },
+
+    // 设置日期组件  state 1 创建/修改  2 取消
+    settingTimeComponent: function(state){
+      if(state){
+        // 获取选中日期格式
+        var dataFormat = {
+          label: '',
+          value: this.timeComponentSetting.form.timeFormat
+        };
+        this.timeComponentSetting.format.forEach(option => {
+          if(option.value == this.timeComponentSetting.form.timeFormat){
+            dataFormat.label = option.label;
+          }
+        });
+
+        console.log(dataFormat);
+
+        // 创建/修改
+        if(this.timeComponentSetting.type == 1){
+          // 创建
+          this.addGridItem(this.id++, 'time', 8, 5, {
+            "title": "我是日期组件标题",
+            "titleIsShow": true,
+            "config": true,
+            "timeFormat": {
+              label: dataFormat.label,
+              value: dataFormat.value
+            },
+            "fontBold": this.timeComponentSetting.form.fontBold,
+            "fontNum": this.timeComponentSetting.form.fontNum,
+            "color": this.timeComponentSetting.form.color
+          });
+        }else{
+          // 修改
+          this.layout.forEach(gridItem => {
+            if(gridItem.i == this.timeComponentSetting.form.id){
+              console.log(gridItem);
+              gridItem.options.timeFormat.label = dataFormat.label;
+              gridItem.options.timeFormat.value = dataFormat.value;
+              gridItem.options.fontNum = this.timeComponentSetting.form.fontNum;
+              gridItem.options.fontBold = this.timeComponentSetting.form.fontBold;
+              gridItem.options.color = this.timeComponentSetting.form.color;
+              gridItem.options.updataTime = this.updateTimes();
+            }
+          });
+        }
+      }
+      this.timeComponentSetting.show = false;
+    }
+
     // refGrid: function () {
     //   // console.log(this.$refs.gridLayout);
     //   this.resizeFun = this.$refs.gridLayout.resizeEvent;
@@ -548,13 +800,13 @@ export default {
     GridLayout: VueGridLayout.GridLayout,
     GridItem: VueGridLayout.GridItem,
 
-    // grid-legend
-    GridChart,
-    GridTable,
-    GridText,
-    GridPic,
-    GridVideo,
-    GridWeb,
+    // // grid-legend
+    // GridChart,
+    // GridTable,
+    // GridText,
+    // GridPic,
+    // GridVideo,
+    // GridWeb,
   }
 }
 </script>
@@ -639,22 +891,23 @@ export default {
               top: -100%;
               /* left: 0; */
               right: 0;
-              height: 30px;
+              // height: 25px;
               /* background: rgba(100,100,100,.4); */
               background: transparent;
               transition: all 0.2s linear;
-              padding: 0 10px;
+              padding: 0;
+              // padding: 0 10px;
               z-index: 10;
               >ul{
                 float: right;
-                padding: 5px 0;
                 >li{
                   float: left;
                   padding: 0 5px;
                   height: 20px;
                   line-height: 20px;
-                  font-size: 18px;
+                  font-size: 16px;
                   text-align: center;
+                  cursor: pointer;
                 }
               }
             }
@@ -664,6 +917,12 @@ export default {
           }
         }
       }
+    }
+  }
+
+  .timeComponentSettingPopup{
+    .el-select{
+      width: 230px;
     }
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="gridChart">
-    <div v-if="options.titleIsShow" class="gridTit">{{options.title}}</div>
-    <div class="echartView" :class="{hasTit: options.titleIsShow}"></div>
+    <div v-if="options.titleIsShow" class="gridItemTit">{{options.title}}</div>
+    <div class="gridItemView" :class="{hasTit: options.titleIsShow}"></div>
   </div>
 </template>
 <script>
@@ -15,7 +15,7 @@ export default {
       echartDom: null,
       // 节流更新句柄
       changeTimer: null,
-      // echarts handle
+      // echarts图表句柄
       echartsHandle: null,
       // echarts options
       echartOption: {
@@ -106,7 +106,7 @@ export default {
     // console.log(this);
     // console.log(this.viewW,this.viewH);
     // 创建组件后初始化echarts
-    this.echartDom = this.$el.querySelector('.echartView');
+    this.echartDom = this.$el.querySelector('.gridItemView');
     this.initChart();
     // console.log(this.echartDom);
 
@@ -150,6 +150,7 @@ export default {
       });
       this.echartsHandle = this.$echarts.init(this.echartDom);
       this.echartsHandle.setOption(this.echartOption, true, false);
+      this.echartsHandle.on('click', this.echartClick);
       setTimeout(()=>{
         this.echartsHandle.resize();
         // 关闭加载 清空句柄
@@ -157,8 +158,10 @@ export default {
         this.loadHandle = null;
       },200);
     },
-    clickMe: function(){
-      console.log(this.options);
+    // 图表被点击事件
+    echartClick: function(params){
+      console.log('图表被点击了');
+      console.log(params);
     }
   }
 }
@@ -167,26 +170,8 @@ export default {
 @import url(../common/base.less);
 
 .gridChart{
-  height: 100%;
-  width: 100%;
-  background-color: #fff;
-  overflow: hidden;
-  >.gridTit{
-    padding: 0 5px;
-    height: 25px;
-    line-height: 25px;
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    color: #fff;
-    background-color: rgba(0,0,0,0.4);
-  }
-  >.echartView{
-    height: 100%;
-    &.hasTit{
-      height: calc(100% - 25px);
-    }
-    width: 100%;
-  }
+  // 基本设置样式
+  .gridItem();
+
 }
 </style>
