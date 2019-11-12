@@ -110,6 +110,7 @@
                 >
                 <div class="itemTopMenu">
                   <ul>
+                    <li v-if="item.type=='pic'" @click="picComponentUploadFile(item)" title="上传"><span class="fa fa-photo"></span></li>
                     <li v-if="item.options.config" @click="configItem(item)" title="配置"><span class="fa fa-cogs"></span></li>
                     <li @click="removeItem(item)" title="删除"><span class="fa fa-trash"></span></li>
                   </ul>
@@ -120,6 +121,7 @@
                   :viewW="item.w"
                   :viewH="item.h"
                   :options="item.options"
+                  :ref="item.type+item.i"
                 >
                 </component>
                 <!-- 富文本编辑
@@ -153,6 +155,18 @@
         <el-form 
           ref="timeComponentSettingForm"
           label-width="80px">
+          <el-form-item label="组件名称" >
+            <el-row>
+              <el-col :span="18">
+                <el-input v-model="timeComponentSetting.form.title" size='small'></el-input>
+              </el-col>
+              <el-col :offset='1' :span="4">
+                <el-switch
+                  v-model="timeComponentSetting.form.titleShow">
+                </el-switch>
+              </el-col>
+            </el-row>
+          </el-form-item>
           <el-form-item label="显示格式">
             <el-select 
               v-model="timeComponentSetting.form.timeFormat" 
@@ -160,7 +174,8 @@
               size='small'
               >
               <el-option 
-                v-for="opt in timeComponentSetting.format"
+                v-for="(opt,idx) in timeComponentSetting.format"
+                :key="idx"
                 :label="opt.label"
                 :value="opt.value" 
               ></el-option>
@@ -185,6 +200,51 @@
         </el-form>
       </div>
     </el-dialog>
+
+    <!-- 图片设置修改弹窗 -->
+    <el-dialog
+      title="组件设置"
+      :visible.sync="picComponentSetting.show"
+      width="300px"
+      >
+      <div class="picComponentSettingPopup">
+        <el-form 
+          ref="picComponentSettingForm"
+          label-width="80px">
+          <el-form-item label="组件名称" >
+            <el-row>
+              <el-col :span="18">
+                <el-input v-model="picComponentSetting.form.title" size='small'></el-input>
+              </el-col>
+              <el-col :offset='1' :span="4">
+                <el-switch
+                  v-model="picComponentSetting.form.titleShow">
+                </el-switch>
+              </el-col>
+            </el-row>
+          </el-form-item>
+
+          <el-form-item label="图片显示">
+            <el-select 
+              v-model="picComponentSetting.form.imgStyle" 
+              size='small'
+              >
+              <el-option 
+                v-for="(opt,idx) in picComponentSetting.style"
+                :key="idx"
+                :label="opt.label"
+                :value="opt.value" 
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" size='small' @click="settingPicComponent(1)">修改</el-button>
+            <el-button size='small' @click="settingPicComponent(2)">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-dialog>
+    
   </div>
 </template>
 <script>
@@ -285,6 +345,10 @@ export default {
         form: {
           // 设置ID
           id: '',
+          // 标题
+          title: '',
+          // 是否展示
+          titleShow: true,
           // 日期显示格式
           timeFormat: 1,
           // 字体大小
@@ -295,6 +359,38 @@ export default {
           color: '#666666'
         }
 
+      },
+      // 图片组件设置
+      picComponentSetting: {
+        // 显示
+        show: false,
+        // 显示样式
+        style: [
+          {
+            label: '拉伸',
+            value: 'fill'
+          },{
+            label: '居中',
+            value: 'contain'
+          },{
+            label: '平铺',
+            value: 'cover'
+          },{
+            label: '无',
+            value: 'none'
+          }
+        ],
+        // 表单 
+        form: {
+          // 设置ID
+          id: '',
+          // 标题
+          title: '',
+          // 是否展示
+          titleShow: true,
+          // 显示样式
+          imgStyle: 'fill',
+        }
       }
     }
   },
@@ -308,7 +404,8 @@ export default {
       // });
     },
     clickMe: function(){
-      this.layout[0].options.title = 12356;
+      console.log('系统设置');
+      // this.layout[0].options.title = 12356;
     },
     // 初始化顶部菜单导航   传入一屏展示个数
     initTopOptions: function(num){
@@ -323,6 +420,7 @@ export default {
     },
     // 选取查询组件
     selSearchComponent: function(){
+      // 关闭查询弹窗
       this.topVisible = false;
       console.log(this.topVisible);
       
@@ -361,9 +459,10 @@ export default {
         },
         'pic': function(){
           that.addGridItem(that.id++, type, 8, 5, {
-            "title": "我是图片组件标题",
+            "title": "图片组件",
             "titleIsShow": true,
-            "config": false,
+            "config": true,
+            "imgStyle": "fill"
           });
 
         },
@@ -371,12 +470,14 @@ export default {
           that.addGridItem(that.id++, type, 8, 5, {
             "title": "我是富文本组件标题",
             "titleIsShow": true,
-            "config": false,
+            "config": true,
           });
         },
         'time': function(){
           // 设置默认选项
           that.timeComponentSetting.type = 1;
+          that.timeComponentSetting.form.title = '日期组件';
+          that.timeComponentSetting.form.titleShow = true;
           that.timeComponentSetting.form.id = '';
           that.timeComponentSetting.form.timeFormat = 1;
           that.timeComponentSetting.form.fontNum = 16;
@@ -533,7 +634,7 @@ export default {
     },
     // 配置项目
     configItem: function(item){
-      console.log(item);
+      // console.log(item);
       var that = this;
       var backFun = {
         'chart': function(){
@@ -544,7 +645,12 @@ export default {
 
         },
         'pic': function(){
-
+          // 修改图片组件
+          that.picComponentSetting.form.id = item.i;
+          that.picComponentSetting.form.title = item.options.title;
+          that.picComponentSetting.form.titleShow = item.options.titleIsShow;
+          that.picComponentSetting.form.imgStyle = item.options.imgStyle;
+          that.picComponentSetting.show = true;
 
         },
         'text': function(){
@@ -553,6 +659,9 @@ export default {
           // 修改时间组件
           that.timeComponentSetting.type = 2;
           that.timeComponentSetting.form.id = item.i;
+
+          that.timeComponentSetting.form.title = item.options.title;
+          that.timeComponentSetting.form.titleShow = item.options.titleIsShow;
 
           that.timeComponentSetting.form.timeFormat = item.options.timeFormat.value;
           that.timeComponentSetting.form.fontNum = item.options.fontNum;
@@ -569,14 +678,6 @@ export default {
       }
       // 分类执行
       backFun[item.type]();
-
-      // for(var i = this.layout.length-1;i>=0;i--){
-      //   var one = this.layout[i];
-      //   if(item.i==one.i){
-      //     one.options.titleIsShow = !one.options.titleIsShow;
-      //     break;
-      //   }
-      // }
     },
     // 生成二维数组地图
     genereatePlaneArr: function (data) {
@@ -632,21 +733,12 @@ export default {
     },
     // 组件更新完成生命周期
     layoutReadyEvent: function(newLayout) {
-      // console.log("4Ready");
-      // console.log(this.layout);
       // 当插件加载完成后  获取现在的二维地图树
       this.layoutMap = this.genereatePlaneArr(this.layout);
     },
     layoutUpdatedEvent: function(newLayout) {
-      // console.log("Updated",newLayout);
-      // console.log(this.layout);
-
-      // console.log('数据变化了');
-      
       // 当插件内容布局发生变化后  获取现在的二维地图树
       this.layoutMap = this.genereatePlaneArr(this.layout);
-      
-      // console.log(this.layoutMap);
     },
     // 更新时间戳
     updateTimes: function(){
@@ -671,14 +763,12 @@ export default {
           }
         });
 
-        console.log(dataFormat);
-
         // 创建/修改
         if(this.timeComponentSetting.type == 1){
           // 创建
           this.addGridItem(this.id++, 'time', 8, 5, {
-            "title": "我是日期组件标题",
-            "titleIsShow": true,
+            "title": this.timeComponentSetting.form.title,
+            "titleIsShow": this.timeComponentSetting.form.titleShow,
             "config": true,
             "timeFormat": {
               label: dataFormat.label,
@@ -692,7 +782,9 @@ export default {
           // 修改
           this.layout.forEach(gridItem => {
             if(gridItem.i == this.timeComponentSetting.form.id){
-              console.log(gridItem);
+              // console.log(gridItem);
+              gridItem.options.title = this.timeComponentSetting.form.title;
+              gridItem.options.titleIsShow = this.timeComponentSetting.form.titleShow;
               gridItem.options.timeFormat.label = dataFormat.label;
               gridItem.options.timeFormat.value = dataFormat.value;
               gridItem.options.fontNum = this.timeComponentSetting.form.fontNum;
@@ -704,66 +796,31 @@ export default {
         }
       }
       this.timeComponentSetting.show = false;
+    },
+    // 设置图片组件  state 1 修改  2 取消
+    settingPicComponent: function(state){
+      if(state){
+        // 修改
+        this.layout.forEach(gridItem => {
+          if(gridItem.i == this.picComponentSetting.form.id){
+            // console.log(gridItem);
+            gridItem.options.title = this.picComponentSetting.form.title;
+            gridItem.options.titleIsShow = this.picComponentSetting.form.titleShow;
+            gridItem.options.imgStyle = this.picComponentSetting.form.imgStyle;
+            gridItem.options.updataTime = this.updateTimes();
+          }
+        });
+      }
+      this.picComponentSetting.show = false;
+    },
+    // 图片组件上传图片  传入 单一项目数据
+    picComponentUploadFile: function(item){
+      console.log(item,this.$refs[item.type+item.i]);
+      // 调用图片子组件选取文件方法
+      if(this.$refs[item.type+item.i][0] && this.$refs[item.type+item.i][0].selImgFile){
+        this.$refs[item.type+item.i][0].selImgFile();
+      }
     }
-
-    // refGrid: function () {
-    //   // console.log(this.$refs.gridLayout);
-    //   this.resizeFun = this.$refs.gridLayout.resizeEvent;
-    //   this.$refs.gridLayout.resizeEvent = (...agrs) => {
-    //     // console.log(agrs);
-    //     this.resizeFun(...agrs);
-    //   }
-    // },
-    // // 添加文本编辑控件
-    // addtextEdit: function () {
-    //   var index = this.addItem(this, 1);
-    //   console.log(index);
-    //   this.$nextTick(function (){
-    //     // window.CKEDITOR.replace(document.querySelector('#text'+index));
-    //     // 启用内联编辑
-    //     CKEDITOR.disableAutoInline = true;
-    //     CKEDITOR.inline(document.querySelector('#text'+index));
-    //   });
-    // },
-    // // 查看文本内容
-    // watchTextContent: function(){
-    //   // console.log(this.textContent);
-    // },
-    // offResize: function(item){
-    //   item.isStatic = true;
-    // },
-    // // 当模块视口失焦里获取内容
-    // onResize: function(item){
-    //   console.log("内容变更");
-    //   item.isStatic = false;
-    // },
-    // // 设置联动
-    // setAssociated: function(item){
-    //   // console.log(item);
-    //   this.layout.forEach(one => {
-    //     // return item.linkModel = 
-    //     one.isStatic = true;
-    //     if(item.i==one.i){
-    //       one.linkModel = 'linkMain';
-    //       one.isLink = true;
-    //     }else{
-    //       one.linkModel = 'linkLayer';
-    //     }
-    //   });
-    // },
-    // // 取消关联
-    // cancelAssociated: function(){
-    //   this.layout.forEach(one => {
-    //     one.linkModel = "";
-    //     one.isStatic = false;
-    //   });
-    // },
-    // // 选取关联
-    // setLink: function(item){
-    //   if(item.linkModel != 'linkMain'){
-    //     item.isLink = !item.isLink;
-    //   }
-    // },
       
   },
   // 通过计算属性，监听视口变化
@@ -866,9 +923,10 @@ export default {
   }
 
   >.configMain{
-    margin-top: 10px;
+    margin-top: 5px;
     // padding: 10px;
-    height: calc(100% - 50px);
+    height: calc(100% - 45px);
+    overflow: auto;
     border-radius: 5px;
     background-color: @modelPartitionBGColor;
     >.drapView{
