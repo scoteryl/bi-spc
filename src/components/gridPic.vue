@@ -1,7 +1,10 @@
 <template>
   <div class="gridPic">
     <div v-if="options.titleIsShow" class="gridItemTit">{{options.title}}</div>
-    <div class="gridItemView" :class="{hasTit: options.titleIsShow}"
+    <div 
+      class="gridItemView" 
+      :class="{hasTit: options.titleIsShow}"
+      :style="{backgroundColor: options.bgColor||'transparent'}"
       @dblclick="selImgFile"
       >
       <el-image

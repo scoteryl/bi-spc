@@ -1,7 +1,11 @@
 <template>
   <div class="gridTime">
     <div v-if="options.titleIsShow" class="gridItemTit">{{options.title}}</div>
-    <div class="gridItemView" :class="{hasTit: options.titleIsShow}">
+    <div 
+      class="gridItemView" 
+      :class="{hasTit: options.titleIsShow}"
+      :style="{backgroundColor: options.bgColor||'transparent'}"
+      >
       <p :style="{fontSize: options.fontNum+'px',color: options.color,fontWeight: options.fontBold?'bold':'normal'}">
         <span>{{timeShowStr}}</span>
       </p>

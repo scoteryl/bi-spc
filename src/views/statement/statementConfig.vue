@@ -46,6 +46,7 @@
               <span>web<br>组件</span>
             </div>
           </li>
+          <!-- 查询组件 -->
           <li class="swiper-slide">
             <el-popover
               placement="bottom"
@@ -54,12 +55,12 @@
               >
               <div class="popupView">
                 <ul>
-                  <li><img src=""><span>文本查询</span></li>
+                  <li @click="selSearchComponent"><img src=""><span>文本查询</span></li>
                   <!-- <li><img src=""><span>滑块</span></li> -->
-                  <li><img src=""><span>日期选取</span></li>
-                  <li><img src=""><span>下拉选取</span></li>
-                  <li><img src=""><span>数值区间</span></li>
-                  <li><img src=""><span>日期区间</span></li>
+                  <li @click="selSearchComponent"><img src=""><span>日期选取</span></li>
+                  <li @click="selSearchComponent"><img src=""><span>下拉选取</span></li>
+                  <li @click="selSearchComponent"><img src=""><span>数值区间</span></li>
+                  <li @click="selSearchComponent"><img src=""><span>日期区间</span></li>
                 </ul>
               </div>
               <div class="optionItem" slot="reference">
@@ -93,6 +94,7 @@
           >
           <grid-item v-for="(item,idx) in layout"
             class="item"
+            :class="{itemFixed: item.fixed}"
             :x="item.x"
             :y="item.y"
             :w="item.w"
@@ -110,8 +112,15 @@
                 >
                 <div class="itemTopMenu">
                   <ul>
+                    <!-- 悬浮 -->
+                    <li @click="setGridItemFixed(item)"><span class="fa" :class="item.fixed?'fa-arrow-circle-o-down':'fa-arrow-circle-o-up'" :title="item.fixed?'不悬浮':'悬浮'"></span></li>
+                    <!-- 音视频组件上传 -->
+                    <li v-if="item.type=='video'" @click="videoComponentUploadFile(item)" title="上传"><span class="fa fa-video-camera"></span></li>
+                    <!-- 图片组件上传 -->
                     <li v-if="item.type=='pic'" @click="picComponentUploadFile(item)" title="上传"><span class="fa fa-photo"></span></li>
+                    <!-- 配置 -->
                     <li v-if="item.options.config" @click="configItem(item)" title="配置"><span class="fa fa-cogs"></span></li>
+                    <!-- 删除 -->
                     <li @click="removeItem(item)" title="删除"><span class="fa fa-trash"></span></li>
                   </ul>
                 </div>
@@ -145,7 +154,7 @@
       </div>
     </div>
 
-    <!-- 日期设置修改弹窗 -->
+    <!-- 日期组件设置修改弹窗 -->
     <el-dialog
       title="组件设置"
       :visible.sync="timeComponentSetting.show"
@@ -193,6 +202,10 @@
               >
             </el-switch>
           </el-form-item>
+
+          <el-form-item label="背景颜色" >
+            <el-color-picker v-model="timeComponentSetting.form.bgColor" show-alpha size="small"></el-color-picker>
+          </el-form-item>
           <el-form-item>
             <el-button type="primary" size='small' @click="settingTimeComponent(1)">{{timeComponentSetting.type==1?'创建':'修改'}}</el-button>
             <el-button size='small' @click="settingTimeComponent(2)">取消</el-button>
@@ -201,7 +214,7 @@
       </div>
     </el-dialog>
 
-    <!-- 图片设置修改弹窗 -->
+    <!-- 图片组件设置修改弹窗 -->
     <el-dialog
       title="组件设置"
       :visible.sync="picComponentSetting.show"
@@ -237,18 +250,55 @@
               ></el-option>
             </el-select>
           </el-form-item>
+
+          <el-form-item label="背景颜色" >
+            <el-color-picker v-model="picComponentSetting.form.bgColor" show-alpha size="small"></el-color-picker>
+          </el-form-item>
           <el-form-item>
-            <el-button type="primary" size='small' @click="settingPicComponent(1)">修改</el-button>
-            <el-button size='small' @click="settingPicComponent(2)">取消</el-button>
+            <el-button type="primary" size='small' @click="settingComponent(1,'pic')">修改</el-button>
+            <el-button size='small' @click="settingComponent(2,'pic')">取消</el-button>
           </el-form-item>
         </el-form>
       </div>
     </el-dialog>
     
+    <!-- 文本组件设置修改弹窗 -->
+    <el-dialog
+      title="组件设置"
+      :visible.sync="textComponentSetting.show"
+      width="300px"
+      >
+      <div class="textComponentSettingPopup">
+        <el-form 
+          ref="textComponentSettingForm"
+          label-width="80px">
+          <el-form-item label="组件名称" >
+            <el-row>
+              <el-col :span="18">
+                <el-input v-model="textComponentSetting.form.title" size='small'></el-input>
+              </el-col>
+              <el-col :offset='1' :span="4">
+                <el-switch
+                  v-model="textComponentSetting.form.titleShow">
+                </el-switch>
+              </el-col>
+            </el-row>
+          </el-form-item>
+          <el-form-item label="背景颜色" >
+            <el-color-picker v-model="textComponentSetting.form.bgColor" show-alpha size="small"></el-color-picker>
+          </el-form-item>
+      
+          <el-form-item>
+            <el-button type="primary" size='small' @click="settingComponent(1,'text')">修改</el-button>
+            <el-button size='small' @click="settingComponent(2,'text')">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import VueGridLayout from 'vue-grid-layout';
+import VueGridLayout from 'vue-grid-layout2';
 
 // 图例组件
 const GridChart = () => import('../../components/gridChart.vue');
@@ -289,7 +339,38 @@ export default {
       gridConfig: {
         margin: [2, 2],
         colNum: 50,
-        height: 20
+        height: 20,
+      },
+      // gird 组件默认宽高配置
+      gridComponentDefaultView: {
+        "chart": {
+          w: 20,
+          h: 10
+        },
+        "table": {
+          w: 20,
+          h: 10
+        },
+        "pic": {
+          w: 10,
+          h: 8
+        },
+        "text": {
+          w: 15,
+          h: 15
+        },
+        "time": {
+          w: 10,
+          h: 6
+        },
+        "video": {
+          w: 20,
+          h: 10
+        },
+        "web": {
+          w: 10,
+          h: 6
+        }
       },
 
       // 日期组件设置
@@ -349,6 +430,8 @@ export default {
           title: '',
           // 是否展示
           titleShow: true,
+          // 组件背景色
+          bgColor: '#fff',
           // 日期显示格式
           timeFormat: 1,
           // 字体大小
@@ -388,14 +471,32 @@ export default {
           title: '',
           // 是否展示
           titleShow: true,
+          // 组件背景色
+          bgColor: '#fff',
           // 显示样式
           imgStyle: 'fill',
+        }
+      },
+      // 图片组件设置
+      textComponentSetting: {
+        // 显示
+        show: false,
+        // 表单 
+        form: {
+          // 设置ID
+          id: '',
+          // 标题
+          title: '',
+          // 是否展示
+          titleShow: true,
+          // 组件背景色
+          bgColor: '#fff',
         }
       }
     }
   },
   methods: {
-    // 是否可以拖拽
+    // 是否可以拖拽 测试
     griddrap: function(item, state){
       // console.log(item,state);
       // item.isStatic = !state;
@@ -403,10 +504,12 @@ export default {
       //   if(one.)
       // });
     },
+    // 测试
     clickMe: function(){
       console.log('系统设置');
       // this.layout[0].options.title = 12356;
     },
+
     // 初始化顶部菜单导航   传入一屏展示个数
     initTopOptions: function(num){
       // 如果初始化过swiper则销毁
@@ -442,47 +545,59 @@ export default {
     addLegend: function(type){
       var that = this;
       var backFun = {
+        // 图例
         'chart': function(){
-          that.addGridItem(that.id++, type, 8, 5, {
+          that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
             "title": "我是图表组件标题",
             "titleIsShow": true,
             "config": true,
+            "bgColor": '#fff'
           });
         },
+        // 表格
         'table': function(){
-          that.addGridItem(that.id++, type, 8, 5, {
+          that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
             "title": "我是表格组件标题",
             "titleIsShow": true,
             "config": true,
+            "bgColor": '#fff'
           });
 
         },
+        // 图片
         'pic': function(){
-          that.addGridItem(that.id++, type, 8, 5, {
+          that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
             "title": "图片组件",
             "titleIsShow": true,
             "config": true,
-            "imgStyle": "fill"
+            "imgStyle": "fill",
+            "bgColor": '#fff'
           });
 
         },
+        // 富文本
         'text': function(){
-          that.addGridItem(that.id++, type, 8, 5, {
-            "title": "我是富文本组件标题",
+          that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
+            "title": "文本组件",
             "titleIsShow": true,
             "config": true,
+            "bgColor": '#fff'
           });
         },
+        // 日期
         'time': function(){
           // 设置默认选项
           that.timeComponentSetting.type = 1;
           that.timeComponentSetting.form.title = '日期组件';
           that.timeComponentSetting.form.titleShow = true;
+
           that.timeComponentSetting.form.id = '';
           that.timeComponentSetting.form.timeFormat = 1;
           that.timeComponentSetting.form.fontNum = 16;
           that.timeComponentSetting.form.fontBold = false;
           that.timeComponentSetting.form.color = '#666666';
+          
+          that.timeComponentSetting.form.bgColor = '#fff';
 
           that.timeComponentSetting.show = true;
           // that.addGridItem(that.id++, type, 8, 5, {
@@ -491,18 +606,22 @@ export default {
           //   "config": true,
           // });
         },
+        // 音视频
         'video': function(){
-          that.addGridItem(that.id++, type, 8, 5, {
-            "title": "我是音视频组件标题",
+          that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
+            "title": "音视频组件",
             "titleIsShow": true,
             "config": true,
+            "bgColor": '#fff'
           });
         },
+        // web组件
         'web': function(){
-          that.addGridItem(that.id++, type, 8, 5, {
+          that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
             "title": "我是web组件标题",
             "titleIsShow": true,
             "config": true,
+            "bgColor": '#fff'
           });
         },
       }
@@ -537,6 +656,8 @@ export default {
         "linkModel": '',
         // 是否静态不可编辑
         "isStatic": false,
+        // 是否悬浮
+        "fixed": false,
         // 是否联动项目
         "isLink": false,
         // options
@@ -568,6 +689,7 @@ export default {
                 "type": type,
                 "linkModel": '',
                 "isStatic": false,
+                "fixed": false,
                 "isLink": false,
                 "options": {
                   ...opiton,
@@ -632,6 +754,22 @@ export default {
         // 取消
       });
     },
+    setGridItemFixed: function(item){
+      console.log(item);
+      console.log('设置单一项目是否悬浮');
+      item.fixed = !item.fixed;
+      // setTimeout(()=>{
+      //   item.y = item.y+1;
+      // },100);
+      // if(item.fixed){
+      //   // 取消悬浮
+      //   item.y = item.y+1;
+      // }else{
+      //   // 悬浮
+      //   item.fixed = !item.fixed;
+      //   item.y = item.y+1;
+      // }
+    },
     // 配置项目
     configItem: function(item){
       // console.log(item);
@@ -654,6 +792,12 @@ export default {
 
         },
         'text': function(){
+          // 修改图片组件
+          that.textComponentSetting.form.id = item.i;
+          that.textComponentSetting.form.title = item.options.title;
+          that.textComponentSetting.form.titleShow = item.options.titleIsShow;
+          that.textComponentSetting.form.bgColor = item.options.bgColor;
+          that.textComponentSetting.show = true;
         },
         'time': function(){
           // 修改时间组件
@@ -685,6 +829,11 @@ export default {
       if(Array.isArray(data)){
         for(var i = 0; i<data.length; i ++){
           var one = data[i];
+          // console.log(one);
+          // 跳过悬浮定位
+          if( one.fixed ){
+            continue;
+          }
           // 循环行
           for(var r = one.y ; r < ( one.y + one.h ) ; r++){
             // 循环列
@@ -744,7 +893,7 @@ export default {
     updateTimes: function(){
       return parseInt(new Date().getTime()+''+this.rnd(100,999));
     },
-    // 返回随机数
+    // 返回指定范围随机数
     rnd: function (m,n) {
       return (Math.random()*(m-n+1)+n)|0;
     },
@@ -766,7 +915,7 @@ export default {
         // 创建/修改
         if(this.timeComponentSetting.type == 1){
           // 创建
-          this.addGridItem(this.id++, 'time', 8, 5, {
+          this.addGridItem(this.id++, 'time', this.gridComponentDefaultView['time'].w, this.gridComponentDefaultView['time'].h, {
             "title": this.timeComponentSetting.form.title,
             "titleIsShow": this.timeComponentSetting.form.titleShow,
             "config": true,
@@ -776,7 +925,8 @@ export default {
             },
             "fontBold": this.timeComponentSetting.form.fontBold,
             "fontNum": this.timeComponentSetting.form.fontNum,
-            "color": this.timeComponentSetting.form.color
+            "color": this.timeComponentSetting.form.color,
+            "bgColor": this.timeComponentSetting.form.bgColor,
           });
         }else{
           // 修改
@@ -790,6 +940,7 @@ export default {
               gridItem.options.fontNum = this.timeComponentSetting.form.fontNum;
               gridItem.options.fontBold = this.timeComponentSetting.form.fontBold;
               gridItem.options.color = this.timeComponentSetting.form.color;
+              gridItem.options.bgColor = this.timeComponentSetting.form.bgColor;
               gridItem.options.updataTime = this.updateTimes();
             }
           });
@@ -797,25 +948,42 @@ export default {
       }
       this.timeComponentSetting.show = false;
     },
-    // 设置图片组件  state 1 修改  2 取消
-    settingPicComponent: function(state){
+    // 设置组件  state 1 修改  2 取消  type 组件类型
+    settingComponent: function(state, type){
+      // 图片组件设置 富文本组件设置 共用一个弹窗确认取消
+      var targetFormData = type=='pic'?this.picComponentSetting.form:this.textComponentSetting.form;
       if(state){
         // 修改
         this.layout.forEach(gridItem => {
-          if(gridItem.i == this.picComponentSetting.form.id){
+          if(gridItem.i == targetFormData.id){
             // console.log(gridItem);
-            gridItem.options.title = this.picComponentSetting.form.title;
-            gridItem.options.titleIsShow = this.picComponentSetting.form.titleShow;
-            gridItem.options.imgStyle = this.picComponentSetting.form.imgStyle;
+
+            for(var key in targetFormData){
+              if(key !== 'id' && key!== 'titleShow'){
+                gridItem.options[key] = targetFormData[key];
+              }else if(key === 'titleShow'){
+                gridItem.options.titleIsShow = targetFormData[key];
+              }
+            }
+
+            // gridItem.options.title = this.picComponentSetting.form.title;
+            // gridItem.options.titleIsShow = this.picComponentSetting.form.titleShow;
+            // gridItem.options.imgStyle = this.picComponentSetting.form.imgStyle;
+            // gridItem.options.bgColor = this.picComponentSetting.form.bgColor;
             gridItem.options.updataTime = this.updateTimes();
           }
         });
       }
-      this.picComponentSetting.show = false;
+      if(type === 'pic'){
+
+        this.picComponentSetting.show = false;
+      }else{
+        this.textComponentSetting.show = false;
+      }
     },
     // 图片组件上传图片  传入 单一项目数据
     picComponentUploadFile: function(item){
-      console.log(item,this.$refs[item.type+item.i]);
+      // console.log(item,this.$refs[item.type+item.i]);
       // 调用图片子组件选取文件方法
       if(this.$refs[item.type+item.i][0] && this.$refs[item.type+item.i][0].selImgFile){
         this.$refs[item.type+item.i][0].selImgFile();
@@ -935,6 +1103,10 @@ export default {
         background-color: #aaa;
         height: 100%;
         transition: none;
+        // 悬浮定位，层级100
+        &.itemFixed{
+          z-index: 100;
+        }
         >.drapBorder{
           padding: 5px;
           height: 100%;
@@ -970,7 +1142,7 @@ export default {
               }
             }
             &:hover>.itemTopMenu{
-              top: 0;
+              top: 3px;
             }
           }
         }

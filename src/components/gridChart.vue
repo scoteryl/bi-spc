@@ -1,7 +1,11 @@
 <template>
   <div class="gridChart">
     <div v-if="options.titleIsShow" class="gridItemTit">{{options.title}}</div>
-    <div class="gridItemView" :class="{hasTit: options.titleIsShow}"></div>
+    <div 
+      class="gridItemView" 
+      :class="{hasTit: options.titleIsShow}"
+      :style="{backgroundColor: options.bgColor||'transparent'}"
+    ></div>
   </div>
 </template>
 <script>

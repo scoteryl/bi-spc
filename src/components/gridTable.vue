@@ -1,9 +1,13 @@
 <template>
   <div class="gridTable">
     <div v-if="options.titleIsShow" class="gridItemTit">{{options.title}} 
-      <button @click="clickMe">clickMe</button>
+      <!-- <button @click="clickMe">clickMe</button> -->
     </div>
-    <div class="gridItemView" :class="{hasTit: options.titleIsShow}">
+    <div 
+      class="gridItemView" 
+      :class="{hasTit: options.titleIsShow}"
+      :style="{backgroundColor: options.bgColor||'transparent'}"
+    >
       <div class="girdTableView" :class="{hasPages: tableConfig.isPages}">
         <el-table
           :data="tableData.data"
@@ -312,7 +316,7 @@ export default {
     },
     // 表格数据列合并
     tableSpanMethod: function(data){
-      console.log(data);
+      // console.log(data);
       // 要合并的数据 返回最后合并点就行
       // 被合并的数据单元格返回 [0,0]或{rowspan:0,colspan:0} ,否则会错顶数据，数据错乱
       if (data.rowIndex % 2 === 0) {
@@ -338,19 +342,6 @@ export default {
         }
       }
 
-      //  if (columnIndex === 0) {
-      //     if (rowIndex % 2 === 0) {
-      //       return {
-      //         rowspan: 2,
-      //         colspan: 1
-      //       };
-      //     } else {
-      //       return {
-      //         rowspan: 0,
-      //         colspan: 0
-      //       };
-      //     }
-      //   }
     },
     // 初始化分页
     initPage: function(){
