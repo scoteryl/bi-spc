@@ -295,9 +295,54 @@
         </el-form>
       </div>
     </el-dialog>
+
+    <!-- 多媒体组件设置修改弹窗 -->
+    <el-dialog
+      title="组件设置"
+      :visible.sync="videoComponentSetting.show"
+      width="300px"
+      >
+      <div class="videoComponentSetting">
+        <el-form 
+          ref="videoComponentSetting"
+          label-width="80px">
+          <el-form-item label="组件名称" >
+            <el-row>
+              <el-col :span="18">
+                <el-input v-model="videoComponentSetting.form.title" size='small'></el-input>
+              </el-col>
+              <el-col :offset='1' :span="4">
+                <el-switch
+                  v-model="videoComponentSetting.form.titleShow">
+                </el-switch>
+              </el-col>
+            </el-row>
+          </el-form-item>
+
+          <el-form-item label="播放控制">
+            <el-checkbox-group v-model="videoComponentSetting.form.control">
+              <el-checkbox label="autoplay">自动播放</el-checkbox>
+              <el-checkbox label="loop">循环</el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+
+          <el-form-item label="背景颜色" >
+            <el-color-picker v-model="videoComponentSetting.form.bgColor" show-alpha size="small"></el-color-picker>
+          </el-form-item>
+      
+          <el-form-item>
+            <el-button type="primary" size='small' @click="settingComponent(1,'video')">修改</el-button>
+            <el-button size='small' @click="settingComponent(2,'video')">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+// // 原拖拽布局插件  
+// import VueGridLayout from 'vue-grid-layout';
+// 新变拖拽布局插件  添加fixed标识
 import VueGridLayout from 'vue-grid-layout2';
 
 // 图例组件
@@ -492,18 +537,28 @@ export default {
           // 组件背景色
           bgColor: '#fff',
         }
+      },
+      // 图片组件设置
+      videoComponentSetting: {
+        // 显示
+        show: false,
+        // 表单 
+        form: {
+          // 设置ID
+          id: '',
+          // 标题
+          title: '',
+          // 是否展示
+          titleShow: true,
+          // 播放控制
+          control: [],
+          // 组件背景色
+          bgColor: '#fff',
+        }
       }
     }
   },
   methods: {
-    // 是否可以拖拽 测试
-    griddrap: function(item, state){
-      // console.log(item,state);
-      // item.isStatic = !state;
-      // this.layout.forEach(one => {
-      //   if(one.)
-      // });
-    },
     // 测试
     clickMe: function(){
       console.log('系统设置');
@@ -612,7 +667,8 @@ export default {
             "title": "音视频组件",
             "titleIsShow": true,
             "config": true,
-            "bgColor": '#fff'
+            "bgColor": '#fff',
+            "control": [],
           });
         },
         // web组件
@@ -754,21 +810,11 @@ export default {
         // 取消
       });
     },
+    // 设置单一项目悬浮
     setGridItemFixed: function(item){
-      console.log(item);
-      console.log('设置单一项目是否悬浮');
+      // console.log(item);
+      // console.log('设置单一项目是否悬浮');
       item.fixed = !item.fixed;
-      // setTimeout(()=>{
-      //   item.y = item.y+1;
-      // },100);
-      // if(item.fixed){
-      //   // 取消悬浮
-      //   item.y = item.y+1;
-      // }else{
-      //   // 悬浮
-      //   item.fixed = !item.fixed;
-      //   item.y = item.y+1;
-      // }
     },
     // 配置项目
     configItem: function(item){
@@ -814,7 +860,14 @@ export default {
 
         },
         'video': function(){
- 
+          // 修改多媒体组件
+          that.videoComponentSetting.form.id = item.i;
+          that.videoComponentSetting.form.title = item.options.title;
+          that.videoComponentSetting.form.titleShow = item.options.titleIsShow;
+          that.videoComponentSetting.form.bgColor = item.options.bgColor;
+          that.videoComponentSetting.form.control = item.options.control;
+          
+          that.videoComponentSetting.show = true;
         },
         'web': function(){
       
@@ -893,7 +946,7 @@ export default {
     updateTimes: function(){
       return parseInt(new Date().getTime()+''+this.rnd(100,999));
     },
-    // 返回指定范围随机数
+    // 返回指定范围随机数  m 最大值  n 最小值
     rnd: function (m,n) {
       return (Math.random()*(m-n+1)+n)|0;
     },
@@ -951,7 +1004,13 @@ export default {
     // 设置组件  state 1 修改  2 取消  type 组件类型
     settingComponent: function(state, type){
       // 图片组件设置 富文本组件设置 共用一个弹窗确认取消
-      var targetFormData = type=='pic'?this.picComponentSetting.form:this.textComponentSetting.form;
+      var componentFormHandle = {
+        "pic": this.picComponentSetting,
+        "text": this.textComponentSetting,
+        "video": this.videoComponentSetting,
+      }
+
+      var targetFormData = componentFormHandle[type].form;
       if(state){
         // 修改
         this.layout.forEach(gridItem => {
@@ -974,12 +1033,9 @@ export default {
           }
         });
       }
-      if(type === 'pic'){
 
-        this.picComponentSetting.show = false;
-      }else{
-        this.textComponentSetting.show = false;
-      }
+      // 关闭弹窗
+      componentFormHandle[type].show = false;
     },
     // 图片组件上传图片  传入 单一项目数据
     picComponentUploadFile: function(item){
@@ -988,7 +1044,15 @@ export default {
       if(this.$refs[item.type+item.i][0] && this.$refs[item.type+item.i][0].selImgFile){
         this.$refs[item.type+item.i][0].selImgFile();
       }
-    }
+    },
+    // 多媒体组件  上传音视频
+    videoComponentUploadFile: function(item){
+      // console.log(item ,this.$refs);
+      // 调用多媒体组件选取文件方法
+      if(this.$refs[item.type+item.i][0] && this.$refs[item.type+item.i][0].selFile){
+        this.$refs[item.type+item.i][0].selFile();
+      }
+    },
       
   },
   // 通过计算属性，监听视口变化
@@ -1004,10 +1068,12 @@ export default {
         clearTimeout(this.throttleTimer);
       }
       this.throttleTimer = setTimeout(()=>{
+        this.throttleTimer = null;
         var viewWidth = document.querySelector("#statementConfigPage .optionList").offsetWidth;
+        // 设置grid 布局行高
+        this.gridConfig.height = this.$el.offsetWidth/50|0;
         // 视口变化 初始化顶部组件列表
         this.initTopOptions((viewWidth/85)|0);
-        this.throttleTimer = null;
         // 遍历grid项目，更新时间戳
         this.layout.forEach(item => {
           item.options.updataTime = this.updateTimes();
@@ -1018,7 +1084,12 @@ export default {
   mounted: function(){
     // 初始化顶部组件列表
     var viewWidth = document.querySelector("#statementConfigPage .optionList").offsetWidth;
+    // 单一选项宽度不小于85
     this.initTopOptions((viewWidth/85)|0);
+
+    // 设置grid 布局行高
+    this.gridConfig.height = this.$el.offsetWidth/50|0;
+    // console.log(this.$el.offsetWidth);
   },
   components: {
     // vue-gril-layout
@@ -1100,7 +1171,7 @@ export default {
     >.drapView{
       .item{
         box-sizing: border-box;
-        background-color: #aaa;
+        background-color: rgba(200,200,200,0.5);
         height: 100%;
         transition: none;
         // 悬浮定位，层级100
