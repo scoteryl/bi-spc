@@ -9,6 +9,8 @@ const StatementClassify = resolve => require(['../views/statement/statementClass
 const StatementConfig = resolve => require(['../views/statement/statementConfig.vue'], resolve);
 // 报表  图例配置
 const LegendConfig = resolve => require(['../views/statement/legendConfig.vue'], resolve);
+// 报表  查询组件配置
+const SearchLegendConfig = resolve => require(['../views/statement/searchLegendConfig.vue'], resolve);
 
 
 Vue.use(VueRouter)
@@ -31,6 +33,10 @@ const routes = [
         path: 'legend',
         name: 'legendConfig',
         component: LegendConfig
+      },{
+        path: 'searchConfig',
+        name: 'searchLegendConfig',
+        component: SearchLegendConfig
       }
     ]
   }

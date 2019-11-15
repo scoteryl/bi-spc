@@ -50,17 +50,33 @@
           <li class="swiper-slide">
             <el-popover
               placement="bottom"
-              width="400"
+              width="120"
               v-model="topVisible"
+              popper-class="searchPopup"
               >
-              <div class="popupView">
+              <div class="searchPopupView">
                 <ul>
-                  <li @click="selSearchComponent"><img src=""><span>文本查询</span></li>
+                  <li @click="selSearchComponent('input')">
+                    <i class="el-icon-search"></i>
+                    <span>文本查询</span>
+                  </li>
                   <!-- <li><img src=""><span>滑块</span></li> -->
-                  <li @click="selSearchComponent"><img src=""><span>日期选取</span></li>
-                  <li @click="selSearchComponent"><img src=""><span>下拉选取</span></li>
-                  <li @click="selSearchComponent"><img src=""><span>数值区间</span></li>
-                  <li @click="selSearchComponent"><img src=""><span>日期区间</span></li>
+                  <li @click="selSearchComponent('date')">
+                    <i class="el-icon-date"></i>
+                    <span>日期选取</span>
+                  </li>
+                  <li @click="selSearchComponent('select')">
+                    <i class="el-icon-tickets"></i>
+                    <span>下拉选取</span>
+                  </li>
+                  <li @click="selSearchComponent('numberInterval')">
+                    <i class="el-icon-c-scale-to-original"></i>
+                    <span>数值区间</span>
+                  </li>
+                  <li @click="selSearchComponent('dateInterval')">
+                    <i class="el-icon-set-up"></i>
+                    <span>日期区间</span>
+                  </li>
                 </ul>
               </div>
               <div class="optionItem" slot="reference">
@@ -73,9 +89,8 @@
       </div>
     </div>
     <div class="configMain">
-      <div class="systemConfig">
-
-      </div>
+      <!-- <div class="systemConfig">
+      </div> -->
       <div class="drapView">
         
         <grid-layout
@@ -359,6 +374,8 @@ const GridTime = ()=> import('../../components/gridTime.vue');
 const GridVideo = () => import('../../components/gridVideo.vue');
 // web组件
 const GridWeb = () => import('../../components/gridWeb.vue');
+// 查询组件
+const GridSearch = () => import('../../components/gridSearch.vue');
 
 
 
@@ -415,6 +432,10 @@ export default {
         "web": {
           w: 10,
           h: 6
+        },
+        "search": {
+          w: 10,
+          h: 5
         }
       },
 
@@ -577,11 +598,29 @@ export default {
       });
     },
     // 选取查询组件
-    selSearchComponent: function(){
+    selSearchComponent: function(type){
       // 关闭查询弹窗
       this.topVisible = false;
-      console.log(this.topVisible);
-      
+      // console.log(this.topVisible);
+
+      var backFun = {
+        "input": 1,
+        "date": 2,
+        "select": 3,
+        "numberInterval": 4,
+        "dateInterval": 5 
+      };
+    
+      // 添加组件  
+      this.addGridItem(this.id++, 'search', this.gridComponentDefaultView['search'].w, this.gridComponentDefaultView['search'].h, {
+        "title": "查询组件",
+        "titleIsShow": true,
+        "config": true,
+        "bgColor": '#fff',
+
+        "type": backFun[type]
+
+      });
     },
     // 动态加载组件
     gridItemComponent: function(type){
@@ -592,7 +631,8 @@ export default {
         'time': GridTime,
         'text': GridText,
         'video': GridVideo,
-        'web': GridWeb
+        'web': GridWeb,
+        'search': GridSearch
       }
       return components[type];
     },
@@ -603,7 +643,7 @@ export default {
         // 图例
         'chart': function(){
           that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
-            "title": "我是图表组件标题",
+            "title": "图表组件标题",
             "titleIsShow": true,
             "config": true,
             "bgColor": '#fff'
@@ -612,7 +652,7 @@ export default {
         // 表格
         'table': function(){
           that.addGridItem(that.id++, type, that.gridComponentDefaultView[type].w, that.gridComponentDefaultView[type].h, {
-            "title": "我是表格组件标题",
+            "title": "表格组件标题",
             "titleIsShow": true,
             "config": true,
             "bgColor": '#fff'
@@ -872,6 +912,17 @@ export default {
         'web': function(){
       
         },
+        'search': function(){
+          // console.log(item);
+          // 跳转查询组件配置
+          that.$router.push({
+            path: '/statement/searchConfig',
+            query: {
+              sid: that.$route.query.sid,
+              tid: item.i
+            }
+          });
+        }
       }
       // 分类执行
       backFun[item.type]();
@@ -1224,6 +1275,38 @@ export default {
   .timeComponentSettingPopup{
     .el-select{
       width: 230px;
+    }
+  }
+}
+
+// 查询组件弹窗
+.searchPopup{
+  min-width: 100px;
+  .searchPopupView{
+    >ul{
+      >li{
+        padding: 0 10px;
+        margin-bottom: 5px; 
+        height: 25px;
+        line-height: 25px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        user-select: none;
+        cursor: pointer;
+        &:hover{
+          border: 1px solid #c5e2e1;
+          color: #3D9D9B;
+        }
+        >span{
+          margin-left: 5px;
+          font-size: 12px;
+          position: relative;
+          top: -1px;
+        }
+        &:last-child{
+          margin: 0;
+        }      
+      }
     }
   }
 }

@@ -57,7 +57,7 @@ export default {
           }
         },
         'legendConfig': function(){
-          if(route.query && route.query.sid && route.query.tid){            
+          if(route.query && (route.query.sid!==undefined && route.query.sid!=='') && (route.query.tid!==undefined && route.query.tid!=='')){            
             that.jumpStatementId = route.query.sid;
             that.topNav.push({
               name: '报表配置',
@@ -71,7 +71,22 @@ export default {
             // 参数不全
             that.$router.replace('/statement/classify');
           }
-
+        },
+        'searchLegendConfig': function(){
+          if(route.query && (route.query.sid!==undefined && route.query.sid!=='') && (route.query.tid!==undefined && route.query.tid!=='') ){
+            that.jumpStatementId = route.query.sid;
+            that.topNav.push({
+              name: '报表配置',
+              path: '/statement/config?sid='+that.jumpStatementId
+            });
+            that.topNav.push({
+              name: '查询组件配置',
+              path: ''
+            });
+          }else{
+            // 参数不全
+            that.$router.replace('/statement/classify');
+          }
         }
       }
       // 执行
@@ -81,9 +96,6 @@ export default {
       }else{
         switchFun[route.name]();
       }
-    },
-    rnd: function(){
-      return Math.random()*100|0;
     }
   },
   watch: {
