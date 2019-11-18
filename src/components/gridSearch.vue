@@ -27,8 +27,10 @@
           <!-- type  date 日  month 月  year 年  datetime 日期加时间  week 周  dates 多选日   -->
           <el-date-picker
             v-model="searchDate"
-            type="date"
+            type="datetime"
             size="small"
+            format="yyyy-MM-dd HH:00"
+            value-format="yyyy-MM-dd HH:00"
             placeholder="选择日期">
           </el-date-picker>
         </div>
@@ -79,8 +81,10 @@
           <!-- type  daterange 日范围选取  monthrange 月范围选取  datetimerange 时间范围 -->
           <el-date-picker
             v-model="dateInterval"
-            type="daterange"
+            type="datetimerange"
             size="small"
+            format="yyyy-MM-dd HH:00"
+            value-format="yyyy-MM-dd HH:00"
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
